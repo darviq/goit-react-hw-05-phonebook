@@ -1,56 +1,39 @@
-import React, {Component} from "react";
-import PropTypes from "prop-types";
-import styled from "styled-components";
+import React, {useState} from "react";
+import Form from "./ContactFormStyled";
 
-const Form = styled.form`
-    width: 300px;
-    padding: 10px 0 15px 20px;
-    border: 2px solid black;
-
-    label,
-    input {
-        display: block;
-    }
-`;
-
-export default class ContactForm extends Component {
-    static propTypes = {
-        addContact: PropTypes.func,
-    };
-
-    state = {
+const ContactForm = ({addContact}) => {
+    const [state, setState] = useState({
         name: "",
         number: "",
-    };
+    });
 
-    inputHandler = e => {
+    const inputHandler = e => {
         const {name, value} = e.target;
-        this.setState({
+        setState(prevState => ({
+            ...prevState,
             [name]: value,
-        });
+        }));
     };
 
-    submitHandler = e => {
+    const submitHandler = e => {
         e.preventDefault();
-        this.props.addContact({...this.state});
-        this.setState({name: "", number: ""});
+        addContact({...state});
+        setState({name: "", number: ""});
     };
 
-    render() {
-        const {name, number} = this.state;
+    return (
+        <Form onSubmit={submitHandler}>
+            <label>
+                Name
+                <input type="text" value={state.name} name="name" onChange={inputHandler} />
+            </label>
+            <label>
+                Number
+                <input type="text" value={state.number} name="number" onChange={inputHandler} />
+            </label>
+            <button type="submit">Add contact</button>
+        </Form>
+    );
+};
 
-        return (
-            <Form onSubmit={this.submitHandler}>
-                <label>
-                    Name
-                    <input type="text" value={name} name="name" onChange={this.inputHandler} />
-                </label>
-                <label>
-                    Number
-                    <input type="text" value={number} name="number" onChange={this.inputHandler} />
-                </label>
-                <button type="submit">Add contact</button>
-            </Form>
-        );
-    }
-}
+export default ContactForm;

@@ -1,36 +1,57 @@
-import React, {Component} from "react";
+import React, {useState, useEffect} from "react";
 import {v4 as uuidv4} from "uuid";
 import ContactForm from "./contactForm/ContactForm";
+import Filter from "./filter/Filter";
 import ContactList from "./contactList/ContactList";
+import styled from "styled-components";
 
-export default class Phonebook extends Component {
-    state = {
+const Div = styled.div`
+    width: 300px;
+    margin-left: 25px;
+
+    h1,
+    h2 {
+        text-align: center;
+    }
+
+    h2 {
+        margin-top: 10px;
+    }
+`;
+
+const Phonebook = () => {
+    const [state, setState] = useState({
         contacts: [],
         filter: "",
-    };
+    });
 
-    componentDidMount = () => {
+    useEffect(() => {
         const localSorageContacts = JSON.parse(localStorage.getItem("contacts"));
         if (localSorageContacts && localSorageContacts.length > 0) {
-            this.setState({contacts: [...localSorageContacts]});
+            setState({
+                contacts: [...localSorageContacts],
+                filter: "",
+            });
         }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem("contacts", JSON.stringify(state.contacts));
+    }, [state.contacts]);
+
+    const addFilter = value => {
+        setState(prevState => ({
+            ...prevState,
+            filter: value,
+        }));
     };
 
-    componentDidUpdate = () => {
-        localStorage.setItem("contacts", JSON.stringify(this.state.contacts));
-    };
-
-    addFilter = e => {
-        this.setState({
-            filter: e.target.value,
-        });
-    };
-
-    addContact = ({name, number}) => {
-        if (this.state.contacts.find(contact => contact.name === name)) {
+    const addContact = ({name, number}) => {
+        if (state.contacts.find(contact => contact.name === name)) {
             alert(`${name} is already in contacts`);
         } else {
-            this.setState(prevState => ({
+            setState(prevState => ({
+                filter: prevState.filter,
                 contacts: [
                     ...prevState.contacts,
                     {
@@ -43,19 +64,25 @@ export default class Phonebook extends Component {
         }
     };
 
-    removeContact = e => {
-        this.setState(prevState => ({
+    const removeContact = e => {
+        setState(prevState => ({
             contacts: [...prevState.contacts.filter(contact => contact.id !== e.target.dataset.id)],
         }));
     };
 
-    render() {
-        return (
-            <>
-                <h2>Phonebook</h2>
-                <ContactForm addContact={this.addContact} />
-                <ContactList state={this.state} addFilter={this.addFilter} removeContact={this.removeContact} />
-            </>
-        );
-    }
-}
+    return (
+        <Div>
+            <h1>Phonebook</h1>
+            <ContactForm addContact={addContact} />
+            {state.contacts.length > 0 && (
+                <>
+                    <h2>Contacts</h2>
+                    <Filter addFilter={addFilter} />
+                </>
+            )}
+            <ContactList {...state} removeContact={removeContact} />
+        </Div>
+    );
+};
+
+export default Phonebook;
