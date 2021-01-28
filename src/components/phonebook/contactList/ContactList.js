@@ -1,26 +1,23 @@
-import ContactItem from "./contactItem/ContactItem";
-import styled from "styled-components";
-
-const Ul = styled.ul`
-    list-style: none;
-    margin-top: 10px;
-`;
+import {ContactItem, Li} from "./contactItem/ContactItem";
+import {TransitionGroup} from "react-transition-group";
 
 const ContactList = ({contacts, filter, removeContact}) => {
     return (
-        <>
-            {contacts.length > 0 && (
-                <>
-                    <Ul>
-                        {filter && filter.length > 0
-                            ? contacts
-                                  .filter(contact => contact.name.toLowerCase().includes(filter.toLowerCase()))
-                                  .map(contact => <ContactItem key={contact.id} {...contact} removeContact={removeContact} />)
-                            : contacts.map(contact => <ContactItem key={contact.id} {...contact} removeContact={removeContact} />)}
-                    </Ul>
-                </>
-            )}
-        </>
+        <TransitionGroup component="ul">
+            {filter && filter.length > 0
+                ? contacts
+                      .filter(contact => contact.name.toLowerCase().includes(filter.toLowerCase()))
+                      .map(contact => (
+                          <Li key={contact.id} timeout={1000} mountOnEnter unmountOnExit>
+                              <ContactItem {...contact} removeContact={removeContact} />
+                          </Li>
+                      ))
+                : contacts.map(contact => (
+                      <Li key={contact.id} timeout={1000} mountOnEnter unmountOnExit>
+                          <ContactItem {...contact} removeContact={removeContact} />
+                      </Li>
+                  ))}
+        </TransitionGroup>
     );
 };
 
